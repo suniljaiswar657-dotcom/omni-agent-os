@@ -20,9 +20,9 @@ This adds a real, authenticated task API backed by Supabase Postgres. It is a **
    - `SUPABASE_ANON_KEY` — publishable/anon key
 4. Redeploy the Vercel project so serverless functions receive the variables.
 
-These are project-specific values. They have not been configured by this repository change.
+These are project-specific values. They have not been configured by this repository change. The frontend requests the public config from `/api/config`; the Vercel serverless endpoint returns only the Supabase URL and anon/publishable key (never the service-role key).
 
-## API authentication
+## Connect the frontend\n\nAfter setting the environment variables and redeploying:\n\n1. Open the deployed OMNI site.\n2. Tap **Sign in** → **Create account** if you do not have a Supabase user yet.\n3. If email confirmation is enabled in Supabase Auth, verify the email, then return and sign in.\n4. The dashboard should switch to **Cloud Task Storage** and load tasks from the API.\n5. Signing out returns the app to local browser mode.\n\nThe app stores the access/refresh session in browser session storage (not localStorage). Use a trusted device and sign out when finished.\n\n## API authentication
 
 Every API request must include the signed-in user's Supabase access token:
 
