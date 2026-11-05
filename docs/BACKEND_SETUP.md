@@ -43,6 +43,8 @@ After adding variables, redeploy. These environment variables are not configured
 
 ## Run a queued task
 
+A task run can make up to three provider requests—one each for Master, Research, and Developer. Check provider pricing before enabling this feature; the UI asks for confirmation before starting. All stages use the same `AI_MODEL` and provider configuration.
+
 1. Sign in to OMNI in cloud mode.
 2. Create a task and choose Master, Research, or Developer.
 3. The frontend can call `POST /api/agents/run` with `{ "taskId": "<task UUID>" }` and the signed-in user's bearer token.
@@ -64,6 +66,6 @@ Content-Type: application/json
 - Task ownership is enforced by Supabase RLS using the user's JWT.
 - Provider keys stay on the server. Never paste them into chat, GitHub source files, or browser code.
 - Model output is untrusted text. It is not proof of execution and does not authorize external actions.
-- The runtime currently performs a single model call per task; it is not yet true multi-agent collaboration, streaming, tool execution, or durable retry orchestration.
-- Cloud task list now shows **Run AI** for queued cloud tasks and displays saved model output in an expandable result panel. The control requires Supabase cloud mode and configured provider environment variables.
+- The runtime currently performs three sequential role-based model calls (Master → Research → Developer) using the same configured provider/model. This is a staged pipeline, not three independently hosted autonomous agents. It does not support streaming, external tool execution, autonomous actions, or durable retry orchestration.
+- Cloud task list shows **Run 3-Agent Pipeline** for queued cloud tasks and displays the combined saved output in an expandable result panel. The button warns that up to three provider calls may incur charges. It requires Supabase cloud mode and configured provider environment variables.
 - Supabase migrations, Vercel environment variables, provider configuration, and live end-to-end testing must be completed by the project owner. Do not claim cloud or AI execution is live until tested.
