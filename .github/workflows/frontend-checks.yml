@@ -28,7 +28,7 @@ jobs:
           test -f styles.css
           test -f app.js
           test -f api/_lib/supabase.js
-          test -f api/tasks.js
+          test -f api/config.js\n          test -f api/tasks.js
           test -f 'api/tasks/[id].js'
           test -f supabase/migrations/202611050001_omni_tasks.sql
           grep -q 'OMNI Agent OS' index.html
