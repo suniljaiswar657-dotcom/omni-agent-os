@@ -6,3 +6,7 @@
 
 .task-action{border:1px solid #354064;background:#171d32;color:#b9c6ff;border-radius:7px;padding:6px 9px;font-size:9px;white-space:nowrap;margin-left:4px}.task-action:hover{border-color:#7c69e8;background:#242044}.task-action.approve{border-color:#285344;background:#132a25;color:#72e5b4}.task-action.reject{border-color:#593043;background:#2b1825;color:#ff9ab4}.status.failed{background:#351d2b;color:#ff8ba6}.status.queued{background:#1b2337;color:#9ca9cb}
 @media(max-width:650px){.mission-item{flex-wrap:wrap}.mission-item .mission-main{min-width:calc(100% - 55px)}.mission-item .task-action{margin-left:0}.mission-item .status{margin-left:auto}}
+
+.auth-tabs{display:flex;gap:8px;padding:4px;border:1px solid #252d46;background:#0a0e1b;border-radius:9px;margin:0 0 15px}.auth-tab{flex:1;border:0;border-radius:6px;background:transparent;color:#7f8aa8;padding:9px;font-size:11px}.auth-tab.active{background:#242044;color:#d9ceff}.auth-message{min-height:18px;font-size:11px;color:#71e5b5;margin:10px 0 0}.auth-message.error{color:#ff8ba6}.auth-btn{padding:8px 12px;font-size:10px}.auth-submit:disabled{opacity:.6;cursor:wait}
+.light-mode .auth-tabs{background:#f4f5fb;border-color:#d9deed}.light-mode .auth-tab{color:#606b84}.light-mode .auth-tab.active{background:#e7e1ff;color:#382778}
+@media(max-width:650px){.auth-btn{padding:7px 9px;font-size:9px}}
