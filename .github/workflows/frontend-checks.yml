@@ -1,4 +1,4 @@
-name: OMNI frontend checks
+name: OMNI project checks
 
 on:
   push:
@@ -16,11 +16,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check JavaScript syntax
-        run: node --check app.js
-      - name: Verify required frontend files
+      - name: Check frontend and API JavaScript syntax
+        run: |
+          node --check app.js
+          node --check api/_lib/supabase.js
+          node --check api/tasks.js
+          node --check 'api/tasks/[id].js'
+      - name: Verify required project files
         run: |
           test -f index.html
           test -f styles.css
           test -f app.js
+          test -f api/_lib/supabase.js
+          test -f api/tasks.js
+          test -f 'api/tasks/[id].js'
+          test -f supabase/migrations/202611050001_omni_tasks.sql
           grep -q 'OMNI Agent OS' index.html
