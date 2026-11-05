@@ -1,0 +1,26 @@
+name: OMNI frontend checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: node --check app.js
+      - name: Verify required frontend files
+        run: |
+          test -f index.html
+          test -f styles.css
+          test -f app.js
+          grep -q 'OMNI Agent OS' index.html
