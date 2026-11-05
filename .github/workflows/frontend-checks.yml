@@ -21,9 +21,11 @@ jobs:
           node --check app.js
           node --check api/_lib/supabase.js
           node --check api/_lib/tasks.js
+          node --check api/_lib/agent-runtime.js
           node --check api/tasks.js
           node --check 'api/tasks/[id].js'
-      - name: Run task workflow unit tests
+          node --check api/agents/run.js
+      - name: Run unit tests
         run: node --test
       - name: Verify required project files
         run: |
@@ -32,9 +34,13 @@ jobs:
           test -f app.js
           test -f api/_lib/supabase.js
           test -f api/_lib/tasks.js
+          test -f api/_lib/agent-runtime.js
           test -f api/config.js
           test -f api/tasks.js
           test -f 'api/tasks/[id].js'
+          test -f api/agents/run.js
           test -f tests/tasks.test.js
+          test -f tests/agent-runtime.test.js
           test -f supabase/migrations/202611050001_omni_tasks.sql
+          test -f supabase/migrations/202611050002_agent_runtime.sql
           grep -q 'OMNI Agent OS' index.html
