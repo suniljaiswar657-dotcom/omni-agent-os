@@ -1,6 +1,6 @@
 const { response, authenticate, supabaseRequest } = require("../_lib/supabase");
 const { isValidTaskId } = require("../_lib/tasks");
-const { getProviderConfig, runModel } = require("../_lib/agent-runtime");
+const { getProviderConfig, runPipeline } = require("../_lib/agent-runtime");
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -44,7 +44,7 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      const result = await runModel(task, provider);
+      const result = await runPipeline(task, provider);
       const { response: finishResponse, data: finishedRows } = await supabaseRequest(
         `omni_tasks?id=eq.${encodeURIComponent(taskId)}&status=eq.in_progress`,
         auth.token,
@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
       if (!Array.isArray(finishedRows) || !finishedRows[0]) {
         return response(res, 409, { error: "Task state changed while the AI was running. Refresh before proceeding." });
       }
-      return response(res, 200, { task: finishedRows[0], output: result.output, model: result.model, requiresApproval: true });
+      return response(res, 200, { task: finishedRows[0], output: result.output, model: result.model, stages: result.stages, requiresApproval: true });
     } catch (error) {
       const safeMessage = error.code || "AI_RUN_FAILED";
       await supabaseRequest(
