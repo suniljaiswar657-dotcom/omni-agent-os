@@ -1,54 +1,69 @@
-# OMNI Agent OS — Backend Setup (Free-first)
+# OMNI Agent OS — Backend & AI Runtime Setup (Free-first)
 
-This adds a real, authenticated task API backed by Supabase Postgres. It is a **backend foundation**, not an AI-agent runtime yet.
+OMNI is an independent project. Its frontend/local task mode works without cloud credentials. Supabase cloud storage and model-powered agent execution require setup.
 
-## What is implemented
+## Current implementation
 
 - `GET /api/tasks`: list the signed-in user's tasks (up to 100).
-- `POST /api/tasks`: create a task with title, description and agent role.
-- `PATCH /api/tasks/:id`: transition a task through the allowed workflow.
-- Supabase Auth bearer-token validation.
-- Supabase Row Level Security (RLS) for user-owned records.
-- No Supabase service-role key in the API or browser.
+- `POST /api/tasks`: create a task.
+- `PATCH /api/tasks/:id`: advance a task through its allowed workflow.
+- `POST /api/agents/run`: claim a queued task and run the configured AI model.
+- Supabase Auth bearer-token validation and user-scoped Row Level Security.
+- Server-side AI provider adapter using an OpenAI-compatible Chat Completions endpoint.
+- AI output is saved on the task and the task moves to **Awaiting approval**. The model does not execute external actions.
+- Unit tests for task validation, transitions, provider config, and prompt routing.
 
-## Prerequisites
+## Supabase setup
 
-1. Create a Supabase project and enable an authentication provider (email/password is the simplest initial option).
-2. Run `supabase/migrations/202611050001_omni_tasks.sql` in the Supabase SQL Editor.
-3. In Vercel Project → Settings → Environment Variables, add:
-   - `SUPABASE_URL` — Project URL
-   - `SUPABASE_ANON_KEY` — publishable/anon key
-4. Redeploy the Vercel project so serverless functions receive the variables.
+1. Create a Supabase project and enable email/password authentication.
+2. Run these migrations in order in Supabase SQL Editor:
+   - `supabase/migrations/202611050001_omni_tasks.sql`
+   - `supabase/migrations/202611050002_agent_runtime.sql`
+3. In Vercel → Project → Settings → Environment Variables, add:
+   - `SUPABASE_URL` — project URL
+   - `SUPABASE_ANON_KEY` — anon/publishable key
+4. Redeploy the Vercel project.
+5. Open OMNI, create an account, verify email if confirmation is enabled, then sign in.
 
-These are project-specific values. They have not been configured by this repository change. The frontend requests the public config from `/api/config`; the Vercel serverless endpoint returns only the Supabase URL and anon/publishable key (never the service-role key).
+The frontend receives only the Supabase URL and publishable/anon key from `/api/config`. Never expose a Supabase service-role key in frontend code. Keep RLS enabled.
 
-## Connect the frontend\n\nAfter setting the environment variables and redeploying:\n\n1. Open the deployed OMNI site.\n2. Tap **Sign in** → **Create account** if you do not have a Supabase user yet.\n3. If email confirmation is enabled in Supabase Auth, verify the email, then return and sign in.\n4. The dashboard should switch to **Cloud Task Storage** and load tasks from the API.\n5. Signing out returns the app to local browser mode.\n\nThe app stores the access/refresh session in browser session storage (not localStorage). Use a trusted device and sign out when finished.\n\n## API authentication
+## AI provider setup (optional; may incur charges)
 
-Every API request must include the signed-in user's Supabase access token:
+The runtime is not activated until an administrator configures a compatible provider. **Do not add a provider key or enable paid API usage without first choosing a provider and checking its pricing/free tier.**
+
+In Vercel → Settings → Environment Variables, add these server-side variables:
+
+- `AI_PROVIDER_API_KEY` — secret provider API key
+- `AI_MODEL` — model identifier supported by your provider
+- `AI_PROVIDER_BASE_URL` — optional HTTPS base URL; defaults to `https://api.openai.com/v1`
+
+The provider must support `POST /chat/completions` with bearer-token authentication and a response containing `choices[0].message.content`. The API key is used only by serverless code and is never returned by `/api/config`.
+
+After adding variables, redeploy. These environment variables are not configured by this repository commit. API requests may incur provider charges depending on your provider/model and usage.
+
+## Run a queued task
+
+1. Sign in to OMNI in cloud mode.
+2. Create a task and choose Master, Research, or Developer.
+3. The frontend can call `POST /api/agents/run` with `{ "taskId": "<task UUID>" }` and the signed-in user's bearer token.
+4. The server claims only a queued task, calls the configured model, saves the output, and moves the task to **Awaiting approval**.
+5. Review the output before approving or rejecting the task.
+
+Example request:
 
 ```http
+POST /api/agents/run
 Authorization: Bearer <supabase_access_token>
+Content-Type: application/json
+
+{ "taskId": "<task UUID>" }
 ```
 
-Do not put a service-role key in the browser. Do not disable RLS.
+## Safety and limitations
 
-## Status transitions
-
-```
-queued → in_progress → awaiting_approval → completed
-                                      └→ rejected
-```
-
-The API rejects invalid state transitions. Approval is currently an authenticated user's action; production deployments should add role-based operator authorization before exposing approval workflows to multiple users.
-
-## Current limitations
-
-- Frontend still uses browser-local simulation and has not yet been wired to this API.
-- No sign-in UI/token lifecycle yet.
-- No real LLM calls, agent-to-agent runtime, streaming, retries, or external tools.
-- No API integration test or deployment has been run in this change.
-- Do not submit secrets, financial data, or sensitive content until the full app's security model is reviewed.
-
-## Next implementation milestone
-
-Add Supabase Auth UI and token refresh, switch the frontend to API mode after login, then build a provider-agnostic model adapter and orchestrator with explicit human approval for external side effects.
+- Task ownership is enforced by Supabase RLS using the user's JWT.
+- Provider keys stay on the server. Never paste them into chat, GitHub source files, or browser code.
+- Model output is untrusted text. It is not proof of execution and does not authorize external actions.
+- The runtime currently performs a single model call per task; it is not yet true multi-agent collaboration, streaming, tool execution, or durable retry orchestration.
+- The frontend does not yet expose a dedicated **Run AI** control/result viewer; API execution can be invoked after backend setup. UI wiring is the next milestone.
+- Supabase migrations, Vercel environment variables, provider configuration, and live end-to-end testing must be completed by the project owner. Do not claim cloud or AI execution is live until tested.
