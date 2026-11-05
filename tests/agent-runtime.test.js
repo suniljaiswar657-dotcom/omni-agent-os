@@ -28,3 +28,60 @@ test("agent prompts are role-specific and task content is included", () => {
 test("runModel refuses to call provider when not configured", async () => {
   await assert.rejects(() => runModel({title:"Test",agent:"master"}, {configured:false}), /AI provider is not configured/);
 });
+
+
+test("pipeline stages are ordered Master, Research, Developer", async () => {
+  const { PIPELINE_STAGES } = require("../api/_lib/agent-runtime");
+  assert.deepEqual(PIPELINE_STAGES, ["master", "research", "developer"]);
+});
+
+test("pipeline passes earlier agent output into the next handoff", async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push(body.messages[1].content);
+    const stage = calls.length;
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ choices: [{ message: { content: `Stage ${stage} result` } }] })
+    };
+  };
+  try {
+    const { runPipeline } = require("../api/_lib/agent-runtime");
+    const result = await runPipeline(
+      { title: "Create a safe feature", description: "Include tests" },
+      { configured: true, apiKey: "test-key", model: "mock-model", baseUrl: "https://mock.example/v1" }
+    );
+    assert.equal(calls.length, 3);
+    assert.match(calls[0], /Create a safe feature/);
+    assert.match(calls[1], /Stage 1 result/);
+    assert.match(calls[2], /Stage 1 result/);
+    assert.match(calls[2], /Stage 2 result/);
+    assert.deepEqual(result.stages.map(s => s.agent), ["master", "research", "developer"]);
+    assert.match(result.output, /## Master Agent/);
+    assert.match(result.output, /## Developer Agent/);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("pipeline stops if one agent stage fails", async () => {
+  const originalFetch = global.fetch;
+  let calls = 0;
+  global.fetch = async () => {
+    calls++;
+    return { ok: false, status: 429, json: async () => ({}) };
+  };
+  try {
+    const { runPipeline } = require("../api/_lib/agent-runtime");
+    await assert.rejects(
+      () => runPipeline({ title: "test" }, { configured: true, apiKey: "x", model: "m", baseUrl: "https://mock.example/v1" }),
+      error => error.code === "AI_RATE_LIMITED"
+    );
+    assert.equal(calls, 1);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
