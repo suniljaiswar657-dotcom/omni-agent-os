@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070914" />
+  <meta name="description" content="OMNI Agent OS — Multi-agent command center" />
+  <title>OMNI Agent OS — Command Center</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">O</span><span>OMNI<span class="brand-muted"> / AGENT OS</span></span></a>
+      <div class="sidebar-label">WORKSPACE</div>
+      <button class="nav-item active" data-view="overview"><span>◈</span> Command Center</button>
+      <button class="nav-item" data-view="agents"><span>⬡</span> Agent Network <span class="nav-count">3</span></button>
+      <button class="nav-item" data-view="tasks"><span>▤</span> Task Queue</button>
+      <button class="nav-item" data-view="approvals"><span>✓</span> Approval Inbox <span class="nav-count" id="approval-count">0</span></button>
+      <button class="nav-item" data-view="logs"><span>⌁</span> Activity Logs</button>
+      <div class="sidebar-bottom">
+        <div class="mode-card"><span class="status-dot"></span><div><b>Local Simulation</b><small>External AI not connected</small></div></div>
+        <div class="user-mini"><div class="avatar">S</div><div><b>Operator</b><small>Owner access</small></div><span class="settings">⚙</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="mobile-brand">OMNI <span>/ AGENT OS</span></div><div class="breadcrumb">Workspace <span>/</span> <b id="page-title">Command Center</b></div><div class="top-actions"><span class="live-pill"><i></i> SYSTEM ONLINE</span><button class="icon-btn" id="theme-btn" aria-label="Toggle visual theme">◐</button></div></header>
+      <section class="content">
+        <div class="hero-row"><div><div class="eyebrow"><span class="eyebrow-line"></span> MULTI-AGENT ORCHESTRATION</div><h1>Command <span>Center</span></h1><p class="subhead">One mission. Specialized agents. A coordinated workflow.</p></div><button class="primary-btn" id="new-task-btn">＋ Create mission</button></div>
+        <div class="notice"><span class="notice-icon">ⓘ</span><div><b>Local simulation mode</b><p>Tasks and handoffs are currently simulated in this browser. Real AI model calls, external actions and cloud sync are not connected yet.</p></div><button id="dismiss-notice" aria-label="Dismiss notice">×</button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Active agents</span><span class="stat-icon purple">⬡</span></div><strong id="stat-agents">3<span>/ 3</span></strong><small><i class="tiny-dot"></i> Ready for assignment</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Open missions</span><span class="stat-icon blue">◈</span></div><strong id="stat-open">0</strong><small>Across all agent queues</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Awaiting approval</span><span class="stat-icon amber">✓</span></div><strong id="stat-approval">0</strong><small>Operator review required</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Completed today</span><span class="stat-icon green">↗</span></div><strong id="stat-done">0</strong><small>In this browser session</small></article>
+        </div>
+        <div class="section-grid">
+          <section class="panel mission-panel"><div class="panel-heading"><div><h2>Mission queue</h2><p>Track work across your agent network</p></div><button class="text-btn" data-view="tasks">View all →</button></div><div id="mission-list" class="mission-list"></div><div id="empty-missions" class="empty-state"><div class="empty-orb">◇</div><b>No missions yet</b><p>Create your first task and let the agents coordinate.</p><button class="secondary-btn" id="empty-create">＋ Create first mission</button></div></section>
+          <section class="panel agent-panel"><div class="panel-heading"><div><h2>Agent network</h2><p>Your specialized AI workforce</p></div><button class="text-btn" data-view="agents">Explore →</button></div><div id="agent-list" class="agent-list"></div><div class="network-footer"><span class="network-line"></span><span>ORCHESTRATOR READY</span><span class="network-line"></span></div></section>
+        </div>
+        <section class="panel activity-panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Live timeline of mission events</p></div><button class="text-btn" data-view="logs">Full logs →</button></div><div id="activity-list" class="activity-list"></div></section>
+        <footer>OMNI AGENT OS <span>•</span> Operator-first multi-agent workspace <span class="footer-right">Build 0.1.0 · Local mode</span></footer>
+      </section>
+    </main>
+  </div>
+  <dialog id="task-dialog"><form method="dialog" id="task-form"><div class="dialog-head"><div><div class="eyebrow">NEW MISSION</div><h2>Give your agents a task</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div><label for="task-title">Mission title</label><input id="task-title" maxlength="100" placeholder="e.g. Research AI automation opportunities" required /><label for="task-desc">Mission details</label><textarea id="task-desc" rows="4" maxlength="1000" placeholder="What outcome do you want? Add context and constraints…"></textarea><label for="task-agent">Assign primary agent</label><select id="task-agent"><option value="master">Master Orchestrator</option><option value="research">Research Agent</option><option value="developer">Developer Agent</option></select><div class="dialog-note">Simulation only — this will create a local task record, not call an AI model.</div><div class="dialog-actions"><button class="secondary-btn" value="cancel">Cancel</button><button class="primary-btn" id="submit-task" value="default">Create mission →</button></div></form></dialog>
+  <script src="./app.js"></script>
+</body>
+</html>
