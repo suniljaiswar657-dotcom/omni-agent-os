@@ -65,5 +65,5 @@ Content-Type: application/json
 - Provider keys stay on the server. Never paste them into chat, GitHub source files, or browser code.
 - Model output is untrusted text. It is not proof of execution and does not authorize external actions.
 - The runtime currently performs a single model call per task; it is not yet true multi-agent collaboration, streaming, tool execution, or durable retry orchestration.
-- The frontend does not yet expose a dedicated **Run AI** control/result viewer; API execution can be invoked after backend setup. UI wiring is the next milestone.
+- Cloud task list now shows **Run AI** for queued cloud tasks and displays saved model output in an expandable result panel. The control requires Supabase cloud mode and configured provider environment variables.
 - Supabase migrations, Vercel environment variables, provider configuration, and live end-to-end testing must be completed by the project owner. Do not claim cloud or AI execution is live until tested.
